@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Traductor de Señas</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 30px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 14px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    }
+
+    #mensajeActual {
+      font-size: 24px;
+      font-weight: bold;
+      min-height: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Traductor de Señas</h1>
+  <h3>Mensaje actual</h3>
+  <div id="mensajeActual">Cargando...</div>
+  <p>Estado: <span id="estado">-</span></p>
+  <p>Enviados: <span id="enviados">0</span></p>
+</div>
+
+<div class="card">
+  <h3>Historial</h3>
+  <div id="historial">Cargando...</div>
+</div>
+
+<script>
+let cargando = false;
+
+function cargarDashboard() {
+  if (cargando) return;
+  cargando = true;
+
+  google.script.run
+    .withSuccessHandler(function(data) {
+      document.getElementById("mensajeActual").textContent = data.actual;
+      document.getElementById("estado").textContent = data.estado;
+      document.getElementById("enviados").textContent = data.enviados;
+
+      let html = "";
+
+      data.historial.forEach(function(item) {
+        html += `<p>${item[0]} | ${item[1]} | ${item[2]}</p>`;
+      });
+
+      document.getElementById("historial").innerHTML = html;
+      cargando = false;
+    })
+    .withFailureHandler(function(error) {
+      console.log(error);
+      cargando = false;
+    })
+    .obtenerDashboard();
+}
+
+window.onload = function () {
+  cargarDashboard();
+  setInterval(cargarDashboard, 2000);
+};
+</script>
+
+</body>
+</html>
